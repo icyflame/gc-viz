@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v3.js"></script>
+
+    <style>
+      .chart div {
+        font: 10px sans-serif;
+        background-color: steelblue;
+        text-align: right;
+        padding: 3px;
+        margin: 1px;
+        color: white;
+      }
+    </style>
+    <title>JS Bin</title>
+  </head>
+  <body>
+    <div class="chart">
+    </div>
+    <script>
+
+      cumulative_sum = {};
+      var file_names = ["sports.csv", "soccult.csv", "tech.csv"];
+      var gc_names = ["Sports", "Soc-Cult", "Tech"];
+      for (filename in file_names) {
+        var gc_name = gc_names[filename];
+
+        d3.csv(file_names[filename], function(err, hall_list) {
+          var gc_points = [];
+
+
+          for(iter in hall_list) {
+            var sum = 0;
+            for (key in hall_list[iter]) {
+              if (key == "hall") {
+                continue;
+              }
+              var pts = +hall_list[iter][key];
+              sum = sum + pts;
+            }
+            gc_points.push({ "name": hall_list[iter]["hall"], "value": sum });
+          }
+          cumulative_sum[gc_name] = gc_points;
+
+          var max_data = d3.max(gc_points, function(d) { return d.value; });
+
+          var find_mul = d3.scale.linear()
+          .domain([0, max_data])
+          .range([0, 420]);
+
+          d3.select(".chart")
+          .append("div." + gc_name)
+          .selectAll("div")
+          .data(gc_points)
+          .enter().append("div")
+          .style("width", function(d) { return find_mul(d.value) + "px"; })
+          .text(function(d) { return d.name + ", " + d.value + " points"; });
+        });
+
+
+        /*
+        for(gc in gcs) {
+          var halls_keys = ["hall","Debate","Eastern Vocals"," Bengali Elocution","Sketching","Hindi Dramatics","Cartooning","Western Vocals","Eastern Instrumentals","Choreography","{ role: 'annotation' }"];
+          var data = [["Nehru",0,0,0,60,100,60,60,35,40,355],["Azad",35,0,0,25,60,0,35,0,100,255],["LLR",60,60,0,35,0,12,0,0,0,167],["Patel",0,25,25,0,0,0,25,60,0,135],["LBS",0,0,60,0,0,35,0,25,0,120],["RP",25,0,0,0,0,12,0,0,60,97],["SN",0,0,0,0,40,0,0,0,0,40],["MS",0,0,35,0,0,0,0,0,0,35],["BRH",0,35,0,0,0,0,0,0,0,35]];
+
+          var max_data = -5000;
+          for (var i = 0; i < data.length; ++i) {
+            if (data[i][data[i].length-1] > max_data) {
+              max_data = data[i][data[i].length-1];
+            }
+          }
+
+
+          d3.select(".chart")
+          .selectAll("div")
+          .data(data)
+          .enter().append("div")
+          .style("width", function(d) { return find_mul(d[d.length-1]) + "px"; })
+          .text(function(d) { return d[0] + ", " + d[d.length-1] + " points"; });
+        }
+        */
+      }
+
+    </script>
+  </body>
+</html>
