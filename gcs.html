@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <script src="https://d3js.org/d3.v3.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
 
     <style>
       .chart div {
@@ -17,41 +17,62 @@
     <title>JS Bin</title>
   </head>
   <body>
-    <div class="chart">
+    <div class="container-of-charts">
+      <h2>Sports GC</h2>
+      <div class="chart-sports">
+      </div>
+      <h2>Tech GC</h2>
+      <div class="chart-tech">
+      </div>
+      <h2>Soc-Cult GC</h2>
+      <div class="chart-soccult">
+      </div>
     </div>
+
+    <p style="position: absolute; right: 10px; top: 10px">Powered by <a href="awaaziitkgp.org/GC201617.php?page=gc">Awaaz IIT
+      KGP</p>
     <script>
 
-      cumulative_sum = {};
+      cumulative_sum = [];
       var file_names = ["sports.csv", "soccult.csv", "tech.csv"];
       var gc_names = ["Sports", "Soc-Cult", "Tech"];
       for (filename in file_names) {
-        var gc_name = gc_names[filename];
-
+        console.log(filename + "-> " + gc_names[filename]);
         d3.csv(file_names[filename], function(err, hall_list) {
           var gc_points = [];
-
+          var gc_name = "";
 
           for(iter in hall_list) {
             var sum = 0;
             for (key in hall_list[iter]) {
-              if (key == "hall") {
+              if (key.search("hall") >= 0) {
+                gc_name = key.split("-")[0];
                 continue;
               }
               var pts = +hall_list[iter][key];
               sum = sum + pts;
             }
-            gc_points.push({ "name": hall_list[iter]["hall"], "value": sum });
+            if (!isNaN(sum)) {
+              gc_points.push({ 
+                "name": hall_list[iter][gc_name + "-hall"], 
+                "value": sum 
+              });
+            }
           }
-          cumulative_sum[gc_name] = gc_points;
+
+          cumulative_sum.push({
+            "name": gc_name.toLowerCase(), 
+            "value": gc_points
+          });
 
           var max_data = d3.max(gc_points, function(d) { return d.value; });
 
-          var find_mul = d3.scale.linear()
+          var find_mul = d3.scaleLinear()
           .domain([0, max_data])
           .range([0, 420]);
 
-          d3.select(".chart")
-          .append("div." + gc_name)
+          d3.select(".chart-" + gc_name)
+          .attr("class", "chart")
           .selectAll("div")
           .data(gc_points)
           .enter().append("div")
